@@ -1,12 +1,12 @@
-package com.opencondo.surveyservice;
+package com.opencondo.pollservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SurveyserviceApplication {
+public class PollserviceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SurveyserviceApplication.class, args);
+		SpringApplication.run(PollserviceApplication.class, args);
 	}
 }

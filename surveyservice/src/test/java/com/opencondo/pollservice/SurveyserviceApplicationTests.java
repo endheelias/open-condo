@@ -1,4 +1,4 @@
-package com.opencondo.surveyservice;
+package com.opencondo.pollservice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

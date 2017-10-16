@@ -1,4 +1,4 @@
-package com.opencondo.surveyservice.domain.model;
+package com.opencondo.pollservice.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,40 +9,34 @@ import java.util.*;
 @Getter
 @Setter
 @Entity
-public class Survey {
-
+public class Poll {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, length = 100000)
-    Long idUserAuthor;
+    @ManyToOne
+    UserAccount author;
 
     @Column(nullable = false, length = 100000)
     String title;
 
     @Column(nullable = false, length = 100000)
-    Set<String> options;
-
-    @Column(nullable = false, length = 100000)
     Boolean status;
 
-    @Column
-    Map<String, Integer> result;
-
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
+    Set<Option> options = new HashSet<>();
     /**
      * Protected constructor, please use the one with parameters, that are required
      * for this object.
      */
-    protected Survey() {
+    protected Poll() {
     }
 
-    public Survey(Long idUserAuthor, String title) {
-        this.idUserAuthor = idUserAuthor;
+    public Poll(UserAccount author, String title, Set<Option> options) {
+        this.author = author;
         this.title = title;
-        this.options = new HashSet<>();
-        this.result = new HashMap<>();
+        this.options = options;
     }
 
 }

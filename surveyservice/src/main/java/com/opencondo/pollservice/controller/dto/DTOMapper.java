@@ -1,4 +1,4 @@
-package com.opencondo.surveyservice.controller.dto;
+package com.opencondo.pollservice.controller.dto;
 
 /**
  * Simple mapper interface for DTOs. Every DTO must implement this interface.
