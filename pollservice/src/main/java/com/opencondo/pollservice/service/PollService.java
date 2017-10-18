@@ -13,46 +13,48 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * The <code>PollService</code> class is responsible for CRUD operations regarding
+ * option. For queries methods look for <code>MessageQueryService</code>. As a service
+ * this class uses only its related repository, in this case <code>MessageRepository</code>,
+ * operations on others entities are performed using the related services.
+ *
+ * @author Endhe Elias
+ * @version 0.1
+ * @since 0.1
+ */
 @Service
 public class PollService {
 
     PollRepository repository;
     OptionService optionService;
     UserAccountQueryService userAccountQueryService;
+    PollQueryService pollQueryService;
 
-
-    public void init() {
-        Long idAuthor1 = 1l;
-        Long idAuthor2 = 2l;
-
-        String op1 = "autor 1 - opcao 1";
-        String op2 = "autor 1 - opcao 2";
-
-        Set<String> opsAuthor1 = new HashSet<>();
-        opsAuthor1.add(op1);
-        opsAuthor1.add(op2);
-
-
-        String op3 = "author 2 - opcao 3";
-        String op4 = "author 2 - opcao 4";
-
-        Set<String> opsAuthor2 = new HashSet<>();
-        opsAuthor1.add(op3);
-        opsAuthor1.add(op4);
-
-        this.createPoll(idAuthor1, "Enquete Autor 1",  opsAuthor1);
-        this.createPoll(idAuthor2, "Enquete Autor 1",  opsAuthor2);
-    }
-
+    /**
+     * Class constructor with AutoWired dependency injection.
+     */
     @Autowired
-    public PollService(PollRepository repository, OptionService optionService, UserAccountQueryService userAccountQueryService) {
+    public PollService(PollRepository repository,
+                       OptionService optionService,
+                       UserAccountQueryService userAccountQueryService,
+                       PollQueryService pollQueryService) {
         this.repository = repository;
         this.optionService = optionService;
         this.userAccountQueryService = userAccountQueryService;
+        this.pollQueryService = pollQueryService;
     }
 
-    public Poll createPoll(Long idAuthor, String title, Set<String> optionsTitle) {
-        UserAccount author = userAccountQueryService.getUserAccountById(idAuthor);
+    /**
+     * Create a <code>Poll</code> based on author's id, title and title of options.
+     *
+     * @param authorId the <code>Long</code> id of the author.
+     * @param title    the <code>String</code> with pagination page.
+     * @param optionsTitle    <code>Set</code><<code>String</code>>, a set with all title of options.
+     * @return a Poll.
+     */
+    public Poll createPoll(Long authorId, String title, Set<String> optionsTitle) {
+        UserAccount author = userAccountQueryService.getUserAccountById(authorId);
 
         Set<Option> options = new HashSet<>();
 
@@ -69,16 +71,27 @@ public class PollService {
         return poll;
     }
 
+    /**
+     * Get a <code>Poll</code> from database, based on poll's id.
+     *
+     * @param id the <code>Long</code> id of the poll.
+     * @return a Poll.
+     */
     public Poll retrievePoll(Long id) {
         Optional<Poll> optionalPoll = repository.findById(id);
         //TODO: throw new exception for not found and remove this null
         return optionalPoll.orElse(null);
     }
 
-
-    public void closePoll(Long idPoll, Long idAuthor) throws NoPermissionException {
-        if (isAuthor(idPoll, idAuthor)) {
-            Optional<Poll> optionalSurvey = repository.findById(idPoll);
+    /**
+     * Close a election in a <code>Poll</code>, just the poll's author can open it.
+     *
+     * @param pollId the <code>Long</code> id of the poll.
+     * @param authorId the <code>Long</code> id of the author.
+     */
+    public void closePoll(Long pollId, Long authorId) throws NoPermissionException {
+        if (this.pollQueryService.isAuthor(pollId, authorId)) {
+            Optional<Poll> optionalSurvey = repository.findById(pollId);
             Poll poll = optionalSurvey.get();
 
             poll.setStatus(Boolean.FALSE);
@@ -88,10 +101,16 @@ public class PollService {
         }
     }
 
-    public void openPoll(Long idSurvey, Long idAuthor) throws NoPermissionException {
-        Optional<Poll> optionalSurvey = repository.findById(idSurvey);
+    /**
+     * Open a election in a <code>Poll</code>, just the poll's author can open it.
+     *
+     * @param pollId the <code>Long</code> id of the poll.
+     * @param authorId the <code>Long</code> id of the author.
+     */
+    public void openPoll(Long pollId, Long authorId) throws NoPermissionException {
+        Optional<Poll> optionalSurvey = repository.findById(pollId);
 
-        if (isAuthor(idSurvey, idAuthor)) {
+        if (this.pollQueryService.isAuthor(pollId, authorId)) {
             Poll poll = optionalSurvey.get();
 
             poll.setStatus(Boolean.TRUE);
@@ -101,17 +120,5 @@ public class PollService {
         }
     }
 
-    private boolean isAuthor(Long idPoll, Long idAuthor) {
-        Optional<Poll> optionalSurvey = repository.findById(idPoll);
-        Poll poll = optionalSurvey.get();
-
-        UserAccount author = poll.getAuthor();
-
-        if (author.getId() == idAuthor) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
 }
